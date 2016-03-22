@@ -1,6 +1,7 @@
 import React from 'react'
 
 export default React.createClass({
+  // renders our page header
   render () {
     return (
       <div className='main-header'>
