@@ -1,7 +1,6 @@
 # redux-breakout
 ## An introduction to redux
-Redux is a powerful tool for **controlling state within react apps**. We're going to build an app that helps you keep track of your family's happiness.   
-They're starting to worry you.
+Redux is a powerful tool for **controlling state within react apps**. We're going to build an app that helps you keep track of your family's happiness. They're starting to worry you.
 
 ### 1.
 Broadly speaking, redux is a *state management tool*. So before we can dive into it, we need some states to manage. Let's make a new react component for our family members called FamilyMember.js:
@@ -143,8 +142,13 @@ So there's a few things going on here. First off; *WHAT* is that weird `Ω` char
 
 We also add a new function here, called `changeMood`. We make a little `moods` array, (add whatever you want in there, it won't be on the test), and then we Lomega the array. We just want to check to see if our button is working, we'll build the real functionality later.
 
-Finally we add the a `<MoodButton changeMood={this.changeMood}/>` tag into our return function. This means that, for every family member we render, we'll also render their own personal mood button with a `changeMood` prop.
+Finally we add the a `<MoodButton changeMood={this.changeMood}/>` tag into our return function. This means that, for every family member we render, we'll also render their own personal mood button with a `changeMood` *prop*.
 
 Now go to your browser, refresh, and try clicking the buttons. All going well, you should see the `moods` array appearing in your developer console. If not, running `npm start` again. It should have automatically re-bundled, but you know how these things are sometimes.
 
 ### 3.
+I know what you're thinking... where's the goddamn redux already! Let's set that up now. We're going to need to make a **reducer**. You can think of a reducer as the *brain* of a redux app. It receives information (in the form of **actions**), processes them, and then sends back the new state for your application to use. So how does that work?
+
+ Redux has something called a **store**, which is basically a history of previous states. When it receives a new **action**, it compares it to the most recent state in the **store**, and sends back a new, *amended state*. This is the clever part, because it's probably sending back an almost exact *copy* of the previous state, and it only needs to make small changes based on the instructions you gave it in your **action**. Note the word, "**copy**" there. It's very important to understand that states in your store are *immutable*, meaning you can't edit them directly. We make a copy and return it. It's a little more complicated than that, but you can read about that in your own time. Let's get back to the code...
+
+ In your public folder, make a reducer file:
