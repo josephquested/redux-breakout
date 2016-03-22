@@ -20,8 +20,7 @@ export default React.createClass({
       'Amazing',
       'Perfect'
     ]
-
-    Ω('mood')
+    Ω(moods)
   },
 
   render () {

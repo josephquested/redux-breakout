@@ -94,3 +94,57 @@ export default React.createClass({
 What's happening in that `onClick`? We're getting an anonymous function to call our props function. That seems kind of unnecessary. I agree, but currently React automatically calls button `onClick` functions when they render for some reason. Wrapping them in an additional anonymous function seems to fix that issue. If you know why, let me know. It's annoying.
 
 Currently that `onClick` is calling `this.props.changeMood()`. That might be a slight issue, given that `changeMood()` doesn't actually exist. So let's create it up in our parent element, `FamilyMember.js`.
+
+```
+// FamilyMember.js
+...
+import MoodButton from './MoodButton.js'
+
+// don't forget to import the button! ^
+
+export default React.createClass({
+  ...
+  },
+
+  changeMood: function () {
+    const moods = [
+      'Dead',
+      'Dying',
+      'Awful',
+      'Bad',
+      'Neutral',
+      'Good',
+      'Great',
+      'Amazing',
+      'Perfect'
+    ]
+    Ω(moods)
+  },
+
+  // you're adding all of this crap ^
+
+  render () {
+    return (
+      <div className='family-member'>
+        <h2>{this.props.name}</h2>
+        <p>Mood: {this.state.mood}
+        </p>
+
+        <MoodButton changeMood={this.changeMood}/>
+
+        // and adding the button into your render ^
+
+      </div>
+    )
+  }
+})
+```
+So there's a few things going on here. First off; *WHAT* is that weird `Ω` character and where can I get one?! It's an omega symbol, you philistine, it's an amazing npm package for quick, smart console.logs. It's globally installed on this project, but you can get it for your own personal use at [this delicious location](https://github.com/josephquested/lomega "Ω LOMEGA Ω"). It's called Lomega.
+
+We also add a new function here, called `changeMood`. We make a little `moods` array, (add whatever you want in there, it won't be on the test), and then we Lomega the array. We just want to check to see if our button is working, we'll build the real functionality later.
+
+Finally we add the a `<MoodButton changeMood={this.changeMood}/>` tag into our return function. This means that, for every family member we render, we'll also render their own personal mood button with a `changeMood` prop.
+
+Now go to your browser, refresh, and try clicking the buttons. All going well, you should see the `moods` array appearing in your developer console. If not, running `npm start` again. It should have automatically re-bundled, but you know how these things are sometimes.
+
+### 3.
