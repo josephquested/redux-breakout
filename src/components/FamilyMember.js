@@ -8,13 +8,29 @@ export default React.createClass({
     }
   },
 
+  changeMood: function () {
+    const moods = [
+      'Dead',
+      'Dying',
+      'Awful',
+      'Bad',
+      'Neutral',
+      'Good',
+      'Great',
+      'Amazing',
+      'Perfect'
+    ]
+
+    Ω('mood')
+  },
+
   render () {
     return (
       <div className='family-member'>
         <h2>{this.props.name}</h2>
         <p>Mood: {this.state.mood}
         </p>
-        <MoodButton changeMood={() => {console.log('hello')}}/>
+        <MoodButton changeMood={this.changeMood}/>
       </div>
     )
   }

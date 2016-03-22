@@ -93,4 +93,4 @@ export default React.createClass({
 
 What's happening in that `onClick`? We're getting an anonymous function to call our props function. That seems kind of unnecessary. I agree, but currently React automatically calls button `onClick` functions when they render for some reason. Wrapping them in an additional anonymous function seems to fix that issue. If you know why, let me know. It's annoying.
 
-Currently that `onCl`
+Currently that `onClick` is calling `this.props.changeMood()`. That might be a slight issue, given that `changeMood()` doesn't actually exist. So let's create it up in our parent element, `FamilyMember.js`.
