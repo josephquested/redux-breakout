@@ -237,6 +237,136 @@ export default React.createClass({
 This is good, we've set up the `changeMood()` function to take our family member id as an argument, and send through a *CHANGE MOOD* type action call to our store. We use `store.dispatch` to do this. `store.dispatch` is what you call when you want to send things to the `reducer`. Now we need to update our `FamilyMember.js` file, because it's job just got a little easier.
 
 ```
+// FamilyMember.js
+...
+
+export default React.createClass({
+  getInitialState: function () {
+    ...
+  },
+
+  // THE AREA FORMALLY KNOWN AS changeMood()
+  // CUT the change mood function! We don't need it here anymore ^
+
+  render () {
+    return (
+      ...
+        <MoodButton id={this.props.id} changeMood={this.props.changeMood}/>
+
+        // remember!! changeMood is now a *prop* of this class, so make sure to update that here ^
+        // and, very importantly, pass down the id of this family member as a prop too
+      ...
+    )
+  }
+})
+
 ```
 
-Right now, regardless of what happens, we're just returning the state we were given. That isn't very useful, so let's move some of our functionality around. Now that we have a reducer, we're going to need to shuffle our logic over into it. The thinking behind that is that your `components` should know as little as possible, as much of the time as possible. So when we click on our `changeMood` button, we want all of the thinking to actually be done over in the reducer.
+Then we need to make a tiny tweek in `MoodButton.js`, just to let it know that now it needs to pass the family member id in to the `changeMood` function.
+
+```
+// MoodButton.js
+...
+export default React.createClass({
+  render () {
+    ...
+        <button onClick={() => this.props.changeMood(this.props.id)}>Change Mood</button>
+
+        // see? we're passing the family memeber id in now too, don't worry, i'll explain soon ^
+    ...
+  }
+})
+```
+
+The reason we had to do this is because when `FamilyMember.js` was handling our `changeMood()` function, it already had a reference to it's id in `this.state.id`. So we didn't need to pass that prop down into the button. **BUT**, now our `changeMood()` function exists up in `App.js`, so we need to make sure our family member id can make it up there successfully.
+
+We're getting pretty close to a working app now, we can check to see that our `action` call is functioning properly by putting a `lomega` in our `reducer.js`, like so:
+
+```
+// reducer.js
+..
+export default (state, action) => {
+  ...
+    case 'UPDATE MOOD':
+      Ω('family member id', action.id)
+      return state
+  ...
+}
+```
+
+So, as long as nothing has gone terribly wrong, you should now be able to push your buttons and see the family member id displaying in your developer console. Once again, if it's not working, before freaking out, try running `npm start` again.
+
+### 5.
+
+Right now, regardless of what happens, our `reducer` just returns the state it was given. That isn't very useful, so let's move some of our functionality around. Now that we have a `reducer`, we're going to need to shuffle our logic over into it. The thinking behind this is that your `components` should know as little as possible, as much of the time as possible. So when we click on our `changeMood` button, we want all of the thinking to actually be done over in the reducer. If you still have that `moods` array in your clipboard, swell, otherwise, it's time to write a new moods array in our `reducer.js`, and some other logic:
+
+```
+// reducer.js
+
+import clone from 'clone'
+
+const moods = [
+  'Dead',
+  'Dying',
+  'Awful',
+  'Bad',
+  'Neutral',
+  'Good',
+  'Great',
+  'Amazing',
+  'Perfect'
+]
+
+// adding in that moods array ^
+
+const initialState = ['Neutral', 'Neutral', 'Neutral', 'Neutral']
+
+// defining the initial moods for all our family members ^
+
+function randomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// a little helper function, we'll use to get a random mood ^
+
+export default (state = initialState, action) => {
+// we're setting the state default to be our initialState. ES6 rocks! ^
+
+  switch (action.type) {
+    case 'UPDATE MOOD':
+
+      let newState = clone(state)
+      newState[action.id] = moods[randomNumber(0, 8)]
+      Ω(`family member ${action.id} is now...`, newState[action.id], '')
+      return newState
+
+      // all this stuff is new! it's for assigning our new mood state ^
+
+    default:
+      return state
+  }
+}
+```
+
+Alright, so there's a little to digest here. First, we're adding back in our `moods` array.
+that's pretty simple. Next we make an `initialState` variable, we'll use that as a starting point for when the `reducer` first starts up. We give our reducer that initial state on the line `export default (state = initialState, action)`, in ES6 we can set a default value for an argument with the `(argument = value)` syntax. That way if no state is passed into our function, it will default to our `initialState` variable.
+
+The real meat of this change is in our `case 'UPDATE MOOD':` section. Here we clone our old state, then use our `action.id` as an index in our `newState` array. (`newState[action.id]`) So, in this example `newState[0]` is the index for our Mother's mood. And remember back in our `App.js` we structured our `store.dispatch` call like this: `({type: 'UPDATE MOOD', state: this.props.moodStates, id: familyMemberId})`. So there we're specifying that our `action` has the `type` of `UPDATE MOOD`. *(notice how our switch case works based on 'action.type? that's no coincidence!)*. We also send through the current state of our app, (more on that later), and we pass in `id: familyMemberId`. That's the really relevant part here, because we're using that to access the right family member in our `newState` array. (`newState[action.id]`).
+
+Then we *set* the mood of that family member, based on a random mood from our `mood` array. `newState[action.id] = moods[randomNumber(0, 8)]`. We use our `randomNumber()` helper function to pick a random index within our accepted range. It's important to note here, I have *nine* moods in my `mood` array. So I do a `randomNumber(0, 8)` call, to get a random 0-8 index number. If your `mood` array is more or less than nine moods long, you will need to update those `randomNumber(x, x)` arguments accordingly.
+
+Then finally we `lomega` the family member id and their new mood. The syntax there might be a little confusing if you're not familure with `lomega` and ES6 strings. Basically passing in that empty `''` string as the final argument just gives us really nicely spaced console.log output:
+
+```
+family member 1 is now...
+Bad
+
+family member 2 is now...
+Dead
+
+family member 3 is now...
+Amazing
+```
+Then, finally. We return the newState.
+
+*** 6.

@@ -15,7 +15,7 @@ export default React.createClass({
         <h2>{this.props.name}</h2>
         <p>Mood: {this.state.mood}
         </p>
-        <MoodButton changeMood={this.changeMood}/>
+        <MoodButton id={this.props.id} changeMood={this.props.changeMood}/>
       </div>
     )
   }
