@@ -7,7 +7,7 @@ Broadly speaking, redux is a *state management tool*. So before we can dive into
 
    `public/components/FamilyMember.js`
 
-Inside of FamilyMember.js, we're going to write some basic code to display in our render, including the name of our family member as a *prop*, and we're going to set their initial mood state:
+Inside of FamilyMember.js, we're going to write some basic code to display in our `render`, including the `name` and `id` of our family member as `props`, and we're going to set their initial `mood` state:
 
 ```
 // FamilyMember.js
@@ -17,6 +17,7 @@ import React from 'react'
 export default React.createClass({
   getInitialState: function () {
     return {
+      id: this.props.id,
       mood: 'Neutral'
     }
   },
@@ -31,7 +32,7 @@ export default React.createClass({
   }
 })
 ```
-Now over in our App.js render, we're going to add a little code to get our family members displaying on the page. Remember to also require in the FamilyMember.js file, we're gonna need that.
+Now over in our App.js render, we're going to add a little code to get our family members displaying on the page. This will involve passing in their name and id as *props*, we'll need those later. Remember to also require in the FamilyMember.js file, we're also gonna need that.
 
 ```
 // App.js
@@ -46,10 +47,10 @@ export default React.createClass({
       <div className='app'>
         <Header header='redux breakout'/>
 
-        <FamilyMember name='Mom'/>
-        <FamilyMember name='Dad'/>
-        <FamilyMember name='Daughter'/>
-        <FamilyMember name='Son'/>
+        <FamilyMember id={0} name='Mom'/>
+        <FamilyMember id={1} name='Dad'/>
+        <FamilyMember id={2} name='Daughter'/>
+        <FamilyMember id={3} name='Son'/>
 
         // and these! ^
 
@@ -117,7 +118,7 @@ export default React.createClass({
       'Amazing',
       'Perfect'
     ]
-    Ω(moods)
+    Ω(moods, this.state.id)
   },
 
   // you're adding all of this crap ^
@@ -144,11 +145,98 @@ We also add a new function here, called `changeMood`. We make a little `moods` a
 
 Finally we add the a `<MoodButton changeMood={this.changeMood}/>` tag into our return function. This means that, for every family member we render, we'll also render their own personal mood button with a `changeMood` *prop*.
 
-Now go to your browser, refresh, and try clicking the buttons. All going well, you should see the `moods` array appearing in your developer console. If not, running `npm start` again. It should have automatically re-bundled, but you know how these things are sometimes.
+Now go to your browser, refresh, and try clicking the buttons. All going well, you should see the `moods` array and the family member id appearing in your developer console. If not, running `npm start` again. It should have automatically re-bundled, but you know how these things are sometimes.
 
 ### 3.
 I know what you're thinking... where's the goddamn redux already! Let's set that up now. We're going to need to make a **reducer**. You can think of a reducer as the *brain* of a redux app. It receives information (in the form of **actions**), processes them, and then sends back the new state for your application to use. So how does that work?
 
  Redux has something called a **store**, which is basically a history of previous states. When it receives a new **action**, it compares it to the most recent state in the **store**, and sends back a new, *amended state*. This is the clever part, because it's probably sending back an almost exact *copy* of the previous state, and it only needs to make small changes based on the instructions you gave it in your **action**. Note the word, "**copy**" there. It's very important to understand that states in your store are *immutable*, meaning you can't edit them directly. We make a copy and return it. It's a little more complicated than that, but you can read about that in your own time. Let's get back to the code...
 
- In your public folder, make a reducer file:
+ In your src folder, make a reducer template file like this: `/src/reducer.js`
+
+ ```
+// reducer.js
+
+import clone from 'clone'
+
+export default (state, action) => {
+  switch (action.type) {
+
+    case 'UPDATE MOOD':
+      return state
+
+    default:
+      return state
+  }
+}
+ ```
+ So, this reducer doesn't actually do anything yet. But let's go through it and try to understand what's happening. First, we're importing `clone`. There are other ways of doing this, but clone is a useful module for duplicating objects. We're going to run our state through the clone just to *make sure* that we aren't mutating our original data at all. I think this step is more precautionary than strictly necessary.
+
+ Next we're exporting a function that takes a state and an action argument. The state is going to be the current state of our app that we pass in, and the action is going to be whatever changes we want to make to that state. Then we run a little switch case. It's a little redundant in this app, because we're only ever going to be feeding it one case. It's a good thing to add to your template though, because if we wanted to add more cases later we're already set up to do so.
+
+### 4.
+
+ Now we need to set up our `index.js` to use our `reducer`. It won't be much good to our app if we haven't plugged it in anywhere.
+
+ ```
+// index.js
+...
+import { createStore } from 'redux'
+import reducer from './reducer'
+const store = createStore(reducer)
+
+// you're adding these redux variables! ^
+
+const render = () => {
+  ReactDOM.render(<App moodStates={store.getState()} store={store}/>,
+  document.getElementById('app'))
+
+  // look here! you're passing the store and store.getState() as props! ^
+}
+
+store.subscribe(render)
+
+// and this 'score.subscribe' call ^
+
+render()
+
+ ```
+
+So, what's happening here? We're getting a function from redux called `createStore`. Then we're calling it and passing our reducer in as an argument. This basically tells redux, "Hey, you know how you like storing state information in a `store`? Why don't you make a little store for yourself, and here's my instructions for how that store should function".
+
+Next we pass in the `store`, and a function called `getState()` from the store into our `App` react component. This is very important, it lets us update the state of our app based on the most recent state in the store. Also we can pass `action` calls to `store` from inside our `components`. That's how we change our state.
+
+Lastly, we tell our store that it's going to receive it's new instructions from our `render` function, in the form of those `actions` we talked about earlier. Maybe now would be a good time to make one of those actions. It feels like we want to do that over in `FamilyMember.js`, because that's where our `updateMood()` function is. **BUT**, we have a problem. `FamilyMember.js` doesn't know about our store, or our moodStates object. But it needs to so it can make `action` requests. Let's refactor things a little. We'll start by moving our `changeMood()` function up into our `App.js`, that way we don't need to worry about passing our store down into every single component that needs to use it.
+In `App.js`, make the following changes:
+
+```
+// App.js
+...
+
+export default React.createClass({
+
+  changeMood: function (familyMemberId) {
+    this.props.store.dispatch({type: 'UPDATE MOOD', state: this.props.moodStates, id: familyMemberId})
+  },
+
+  // we're adding this changeMood function, which sends our action! ^
+
+  render () {
+    ...
+        <FamilyMember id={0} name='Mom' changeMood={this.changeMood} />
+        <FamilyMember id={1} name='Dad' changeMood={this.changeMood}/>
+        <FamilyMember id={2} name='Daughter' changeMood={this.changeMood}/>
+        <FamilyMember id={3} name='Son' changeMood={this.changeMood}/>
+
+        // and we pass the changeMood function as a prop down to our family members ^
+
+    ...
+  }
+})
+```
+This is good, we've set up the `changeMood()` function to take our family member id as an argument, and send through a *CHANGE MOOD* type action call to our store. We use `store.dispatch` to do this. `store.dispatch` is what you call when you want to send things to the `reducer`. Now we need to update our `FamilyMember.js` file, because it's job just got a little easier.
+
+```
+```
+
+Right now, regardless of what happens, we're just returning the state we were given. That isn't very useful, so let's move some of our functionality around. Now that we have a reducer, we're going to need to shuffle our logic over into it. The thinking behind that is that your `components` should know as little as possible, as much of the time as possible. So when we click on our `changeMood` button, we want all of the thinking to actually be done over in the reducer.

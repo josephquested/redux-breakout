@@ -4,23 +4,9 @@ import MoodButton from './MoodButton.js'
 export default React.createClass({
   getInitialState: function () {
     return {
+      id: this.props.id,
       mood: 'Neutral'
     }
-  },
-
-  changeMood: function () {
-    const moods = [
-      'Dead',
-      'Dying',
-      'Awful',
-      'Bad',
-      'Neutral',
-      'Good',
-      'Great',
-      'Amazing',
-      'Perfect'
-    ]
-    Ω(moods)
   },
 
   render () {
