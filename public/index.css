@@ -1,8 +1,13 @@
 body {
   background-color: rgb(153, 188, 255);
   font-family: 'Roboto', sans-serif;
+  text-align: center;
 }
 
-.main-header {
-  text-align: center;
+h1 {
+  padding-top: 10px;
+}
+
+h2 {
+  padding-top: 10px;
 }
