@@ -12,10 +12,10 @@ export default React.createClass({
     return (
       <div className='app'>
         <Header header='redux breakout'/>
-        <FamilyMember id={0} name='Mom' changeMood={this.changeMood} />
-        <FamilyMember id={1} name='Dad' changeMood={this.changeMood}/>
-        <FamilyMember id={2} name='Daughter' changeMood={this.changeMood}/>
-        <FamilyMember id={3} name='Son' changeMood={this.changeMood}/>
+        <FamilyMember id={0} name='Mom' changeMood={this.changeMood} mood={this.props.moodStates[0]}/>
+        <FamilyMember id={1} name='Dad' changeMood={this.changeMood} mood={this.props.moodStates[1]}/>
+        <FamilyMember id={2} name='Daughter' changeMood={this.changeMood} mood={this.props.moodStates[2]}/>
+        <FamilyMember id={3} name='Son' changeMood={this.changeMood} mood={this.props.moodStates[3]}/>
       </div>
     )
   }

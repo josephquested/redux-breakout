@@ -370,8 +370,54 @@ Amazing
 Then, finally. We return the newState. `return newState`. Feel free to refresh your browser (and maybe `npm start` again), then check out those developer console messages with our family member and their updated mood.
 
 ### 6.
-We're so close now. There are just a couple steps to go. Currently our `reducer` is sucessfully taking in, updating, and pushing back our `moodStates` into the `App.js` react component. But, as you will notice, it isn't updating our HTML with the new moods. Let's change that now, in `FamilyMember.js`:
+We're so close now. There are just a couple steps to go. Currently our `reducer` is sucessfully taking in, updating, and pushing back our `moodStates` into the `App.js` react component. But, as you will notice, it isn't updating our HTML with the new moods. Let's change that now, first in `FamilyMember.js`:
+
+```
+// FamilyMember.js
+  ...
+
+  getInitialState: function () {
+    ...
+    }
+  },
+
+  // remember our get initial state function here? ^
+  // DELETE IT ALL! we're not going to bother with states anymore, because
+  // we're passing everything this component needs down as props now
+
+
+  render () {
+    return (
+    ...
+        <p>Mood: {this.props.mood}
+
+        // one little tweak here ^
+        // instead of generating our mood string based on this.state,
+        // we're now going to get it directly with this.props.mood
+
+    ...
+  }
+})
 
 ```
 
+Now, this isn't going to work yet. Because currently `FamilyMember.js` doesn't actually *have* a `this.props.mood` prop. Let's change that up in `App.js`:
+
 ```
+// App.js
+...
+  render () {
+    return (
+      <div className='app'>
+        <Header header='redux breakout'/>
+        <FamilyMember id={0} name='Mom' changeMood={this.changeMood} mood={this.props.moodStates[0]}/>
+        <FamilyMember id={1} name='Dad' changeMood={this.changeMood} mood={this.props.moodStates[1]}/>
+        <FamilyMember id={2} name='Daughter' changeMood={this.changeMood} mood={this.props.moodStates[2]}/>
+        <FamilyMember id={3} name='Son' changeMood={this.changeMood} mood={this.props.moodStates[3]}/>
+      </div>
+    )
+  }
+})
+
+```
+See what we're doing here? We give each `FamilyMember` component a `mood` prop, and set it by using their `id` as the *index* for our `this.props.moodStates` array. Remember, `moodStates` is actually the `newState` from our redux `store` that we passed in when we rendered the `App` component in `index.js`. It's a little complex, I know. But believe it or not (again, all going well), you should be able to refresh your browser now, and it **will probably be a working app**! If so, congratulations. You have made a redux app. However, that return statement in `App.js` looks a little clumsy, don't you think? Because now, every time we want to add a new family member, we need to add another huge `<FamilyMember id={4} name='Mistress' changeMood={this.changeMood} mood={this.props.moodStates[4]}/>` line. Maybe there's a better way of doing this...
