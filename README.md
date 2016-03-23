@@ -367,6 +367,11 @@ Dead
 family member 3 is now...
 Amazing
 ```
-Then, finally. We return the newState.
+Then, finally. We return the newState. `return newState`. Feel free to refresh your browser (and maybe `npm start` again), then check out those developer console messages with our family member and their updated mood.
 
-*** 6.
+### 6.
+We're so close now. There are just a couple steps to go. Currently our `reducer` is sucessfully taking in, updating, and pushing back our `moodStates` into the `App.js` react component. But, as you will notice, it isn't updating our HTML with the new moods. Let's change that now, in `FamilyMember.js`:
+
+```
+
+```
