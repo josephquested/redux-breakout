@@ -336,7 +336,7 @@ export default (state = initialState, action) => {
     case 'UPDATE MOOD':
 
       let newState = clone(state)
-      newState[action.id] = moods[randomNumber(0, 8)]
+      newState[action.id] = moods[randomNumber(0, moods.length - 1)]
       Ω(`family member ${action.id} is now...`, newState[action.id], '')
       return newState
 
@@ -353,7 +353,7 @@ that's pretty simple. Next we make an `initialState` variable, we'll use that as
 
 The real meat of this change is in our `case 'UPDATE MOOD':` section. Here we clone our old state, then use our `action.id` as an index in our `newState` array. (`newState[action.id]`) So, in this example `newState[0]` is the index for our Mother's mood. And remember back in our `App.js` we structured our `store.dispatch` call like this: `({type: 'UPDATE MOOD', state: this.props.moodStates, id: familyMemberId})`. So there we're specifying that our `action` has the `type` of `UPDATE MOOD`. *(notice how our switch case works based on 'action.type? that's no coincidence!)*. We also send through the current state of our app, (more on that later), and we pass in `id: familyMemberId`. That's the really relevant part here, because we're using that to access the right family member in our `newState` array. (`newState[action.id]`).
 
-Then we *set* the mood of that family member, based on a random mood from our `mood` array. `newState[action.id] = moods[randomNumber(0, 8)]`. We use our `randomNumber()` helper function to pick a random index within our accepted range. It's important to note here, I have *nine* moods in my `mood` array. So I do a `randomNumber(0, 8)` call, to get a random 0-8 index number. If your `mood` array is more or less than nine moods long, you will need to update those `randomNumber(x, x)` arguments accordingly.
+Then we *set* the mood of that family member, based on a random mood from our `mood` array. `newState[action.id] = moods[randomNumber(0, moods.length - 1)]`. We use our `randomNumber()` helper function to pick a random index within our accepted range. It's important to note here, I have *nine* moods in my `mood` array. But you could put however many you want in, because it's searching for a random number between *0* and the *length of our array - 1* `randomNumber(0, moods.length - 1)`.
 
 Then finally we `lomega` the family member id and their new mood. The syntax there might be a little confusing if you're not familure with `lomega` and ES6 strings. Basically passing in that empty `''` string as the final argument just gives us really nicely spaced console.log output:
 
@@ -420,4 +420,87 @@ Now, this isn't going to work yet. Because currently `FamilyMember.js` doesn't a
 })
 
 ```
-See what we're doing here? We give each `FamilyMember` component a `mood` prop, and set it by using their `id` as the *index* for our `this.props.moodStates` array. Remember, `moodStates` is actually the `newState` from our redux `store` that we passed in when we rendered the `App` component in `index.js`. It's a little complex, I know. But believe it or not (again, all going well), you should be able to refresh your browser now, and it **will probably be a working app**! If so, congratulations. You have made a redux app. However, that return statement in `App.js` looks a little clumsy, don't you think? Because now, every time we want to add a new family member, we need to add another huge `<FamilyMember id={4} name='Mistress' changeMood={this.changeMood} mood={this.props.moodStates[4]}/>` line. Maybe there's a better way of doing this...
+See what we're doing here? We give each `FamilyMember` component a `mood` prop, and set it by using their `id` as the *index* for our `this.props.moodStates` array. Remember, `moodStates` is actually the `newState` from our redux `store` that we passed in when we rendered the `App` component in `index.js`. It's a little complex, I know. But believe it or not (again, all going well), you should be able to refresh your browser now and it **will probably be a working app**! If so, congratulations! You have made your first redux app. However, that return statement in `App.js` looks a little clumsy, don't you think? Because now, every time we want to add a new family member, we need to add another huge `<FamilyMember id={4} name='Mistress' changeMood={this.changeMood} mood={this.props.moodStates[4]}/>` line. Maybe there's a better way of doing this...
+
+### 7. (optional improvement)
+
+ Try making the following changes in `App.js`:
+
+```
+...
+
+export default React.createClass({
+  changeMood: function (familyMemberId) {
+    ...
+  },
+
+  generateFamily: function () {
+    const familyMembers = ['Mom', 'Dad', 'Daughter', 'Son', 'Mistress']
+    return familyMembers.map((name, index) => {
+      return <FamilyMember
+      id={index}
+      name={name}
+      key={index}
+      changeMood={this.changeMood}
+      mood={this.props.moodStates[index]}/>
+    })
+  },
+
+  // woah! check out that new function ^
+
+  render () {
+    return (
+      <div className='app'>
+        <Header header='redux breakout'/>
+        {this.generateFamily()}
+
+        // now we're passing in the function, instead of the family members!? ^
+
+      </div>
+    )
+  }
+})
+
+```
+Do you see what's happening here? Now, insteading of adding the `FamilyMember` components one by one, we're *mapping* through an *array of their names*. The map creates a smartly populated component for us, with all the props we need. Pretty clever.
+
+There's one problem though, if you refresh your browser, you'll notice that our new `mistress` family member has indeed been added, but she doesn't have a `mood`! Why is that? Think about it for a second and see if you can work it out...
+
+Okay, time's up. You failed. It's because over in `reducer.js`, we defined `const initialState = ['Neutral', 'Neutral', 'Neutral', 'Neutral']`. So we've only allowed for *four* family members. That's a problem. There's a sneaky little fix for this though, it's just one line over in `FamilyMember.js`:
+
+```
+// FamilyMember.js
+...
+export default React.createClass({
+  render () {
+    ...
+        <p>Mood: {this.props.mood || 'Neutral'}</p>
+
+        // this line here. We add in an 'OR Neutral' condition ^
+    ...
+  }
+})
+
+```
+This is a really simple fix for our problem, if not a little iffy. It definitely works, but I imagine that redux purists would be uncomfortable with the fact that
+we're using something *other than our redux state* to set the `mood`. But redux purists be damned, this is a simple little fix.
+
+Since we're already pissing off those purists, we can get rid of our `initialState` variable over in `reducer.js`, and replace it with an empty array. Like so:
+
+```
+// reducer.js
+...
+
+// const initialState is no more!
+
+export default (state = [], action) => {
+
+  // we replace initialState with an empty array ^
+  ...
+}
+
+```
+Boom. Now you can add as many new family members as you like, they will all start with a *Neutral* mood, and they can all be updated with their own little mood button. And that, my friends, is that.
+
+  **xoxo**
+    **-jq**

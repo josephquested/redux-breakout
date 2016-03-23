@@ -6,7 +6,7 @@ export default React.createClass({
     return (
       <div className='family-member'>
         <h2>{this.props.name}</h2>
-        <p>Mood: {this.props.mood}</p>
+        <p>Mood: {this.props.mood || 'Neutral'}</p>
         <MoodButton id={this.props.id} changeMood={this.props.changeMood}/>
       </div>
     )

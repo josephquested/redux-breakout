@@ -7,7 +7,6 @@ import { createStore } from 'redux'
 import reducer from './reducer'
 
 const store = createStore(reducer)
-Ω(store)
 
 const render = () => {
   // renders our 'App' parent component

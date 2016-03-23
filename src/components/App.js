@@ -8,14 +8,23 @@ export default React.createClass({
     this.props.store.dispatch({type: 'UPDATE MOOD', state: this.props.moodStates, id: familyMemberId})
   },
 
+  generateFamily: function () {
+    const familyMembers = ['Mom', 'Dad', 'Daughter', 'Son', 'Mistress']
+    return familyMembers.map((name, index) => {
+      return <FamilyMember
+      id={index}
+      name={name}
+      key={index}
+      changeMood={this.changeMood}
+      mood={this.props.moodStates[index]}/>
+    })
+  },
+
   render () {
     return (
       <div className='app'>
         <Header header='redux breakout'/>
-        <FamilyMember id={0} name='Mom' changeMood={this.changeMood} mood={this.props.moodStates[0]}/>
-        <FamilyMember id={1} name='Dad' changeMood={this.changeMood} mood={this.props.moodStates[1]}/>
-        <FamilyMember id={2} name='Daughter' changeMood={this.changeMood} mood={this.props.moodStates[2]}/>
-        <FamilyMember id={3} name='Son' changeMood={this.changeMood} mood={this.props.moodStates[3]}/>
+        {this.generateFamily()}
       </div>
     )
   }
