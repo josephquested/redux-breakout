@@ -5,7 +5,7 @@ Redux is a powerful tool for **controlling state within react apps**. We're goin
 ### 1.
 Broadly speaking, redux is a *state management tool*. So before we can dive into it, we need some states to manage. Let's make a new react component for our family members called `FamilyMember.js`:
 
-   `public/components/FamilyMember.js`
+   `src/components/FamilyMember.js`
 
 Inside of `FamilyMember.js`, we're going to write some basic code to display in our `render`, including the `name` and `id` of our family member as `props`, and we're going to set their initial `mood` state:
 
@@ -71,7 +71,7 @@ So, setting their initial states to *'Neutral'* was all well and good, but we al
 Something like, Redux!
 First, let's get those buttons displaying. Howsabout we create a new react class for that. Something along the lines of:
 
-`public/components/MoodButton.js`
+`src/components/MoodButton.js`
 
 Inside of `MoodButton.js`, we will write some basic `render()` code that displays an HTML `button`. Also, when it's clicked, it will perform a function that will be passed in later as a *prop*.
 
